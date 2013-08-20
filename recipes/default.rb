@@ -165,8 +165,28 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
     EOH
   end
 
+
+  # Perform all initial configuration.  This section is for one-time configuration only.
   if !File.exist?("#{node[:magento][:dir]}/app/etc/local.xml") && !Magento.tables_exist?(mysql[:bind_address], db[:username], db[:password], db[:database])
     magento_initial_configuration
+
+    # Configuration for PageCache module to be enabled
+    execute "pagecache-database-inserts" do
+      command "/usr/bin/mysql #{node[:magento][:db][:database]} -u #{node[:magento][:db][:username]} -h #{node[:mysql][:bind_address]} -P #{node[:mysql][:port]} -p#{node[:magento][:db][:password]} < /root/pagecache_inserts.sql"
+      action :nothing
+    end
+
+    # Initializes the page cache configuration
+    template "/root/pagecache_inserts.sql" do
+      source "pagecache.sql.erb"
+      mode "0644"
+      owner "root"
+      variables(
+        :varnishservers => "localhost"
+      )
+      notifies :run, resources(:execute => "pagecache-database-inserts"), :immediately
+    end
+
   end
 
   # Install and configure varnish

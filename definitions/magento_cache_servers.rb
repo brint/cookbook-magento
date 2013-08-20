@@ -23,6 +23,12 @@ define :magento_cache_servers do
       end
     end
 
+    # Clean up old updates
+    execute "clearing old pagecache updates" do
+      command "rm -f /root/pagecache_update.sql"
+      action :run
+    end
+
     # Configuration for PageCache module to be enabled
     execute "pagecache-database-update" do
       command "/usr/bin/mysql #{node[:magento][:db][:database]} -u root -h localhost -P #{node[:mysql][:port]} -p#{node[:mysql][:server_root_password]} < /root/pagecache_update.sql"

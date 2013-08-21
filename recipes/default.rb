@@ -50,10 +50,12 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
               end
 
   user "#{user}" do
-    comment "magento guy"
+    comment "magento system user"
     home "#{node[:magento][:dir]}"
     system true
   end
+
+  node.set['php-fpm']['pool']['magento']['listen'] = "#{node['php-fpm']['master']}:9001"
   # EOF: Initialization block
 
   # Install php-fpm package
@@ -186,7 +188,6 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
       )
       notifies :run, resources(:execute => "pagecache-database-inserts"), :immediately
     end
-
   end
 
   # Install and configure varnish
@@ -210,5 +211,7 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
     echo '#{inst_date}' > #{node[:magento][:dir]}/.installed
     EOH
   end
-
 end
+
+# Allow all slave nodes to leverage this instance of PHP FPM
+fpm_allow

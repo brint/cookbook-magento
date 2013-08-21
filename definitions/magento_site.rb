@@ -96,7 +96,10 @@ define :magento_site do
     end
   end
 
-  node.set['php-fpm']['master'] = "127.0.0.1" if Magento.ip_is_local?(node['php-fpm']['master'])
+  master = "master"
+  if Magento.ip_is_local?(node['php-fpm']['master'])
+    master = "127.0.0.1" # This is for the nginx template
+  end
 
   template "#{node[:nginx][:dir]}/conf.d/routing.conf" do
     source "routing.erb"
@@ -129,6 +132,7 @@ define :magento_site do
         :path => "#{node[:magento][:dir]}",
         :ssl => (site == "ssl")?true:false,
         :sitedomain => sitedomain
+        :master => master
       )
     end
     nginx_site "#{site}" do

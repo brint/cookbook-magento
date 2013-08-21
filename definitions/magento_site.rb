@@ -96,13 +96,17 @@ define :magento_site do
     end
   end
 
-  %w{backend}.each do |file|
-    cookbook_file "#{node[:nginx][:dir]}/conf.d/#{file}.conf" do
-      source "nginx/#{file}.conf"
-      mode 0644
-      owner "root"
-      group "root"
-    end
+  node.set['php-fpm']['master'] = "127.0.0.1" if Magento.ip_is_local?(node['php-fpm']['master'])
+
+  template "#{node[:nginx][:dir]}/conf.d/routing.conf" do
+    source "routing.erb"
+    owner "root"
+    group "root"
+    mode 0644
+    variables(
+      :master => node['php-fpm']['master']
+    )
+    action :create_if_missing
   end
 
   bash "Drop default site" do

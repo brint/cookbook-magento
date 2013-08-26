@@ -38,7 +38,7 @@ unless File.exists?(installed_file)
   magento_database
 
   # Import Sample Data
-  if node[:magento][:use_sample_data]
+  if node[:magento][:use_sample_data] && !Magento.tables_exist?(mysql[:bind_address], db[:username], db[:password], db[:database])
     include_recipe "mysql::client"
 
     remote_file "#{Chef::Config[:file_cache_path]}/magento-sample-data.tar.gz" do

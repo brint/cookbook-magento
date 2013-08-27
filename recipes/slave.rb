@@ -59,6 +59,7 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
   user "#{ro_user}" do
     comment "magento read only user"
     home "#{node[:magento][:dir]}"
+    gid "www-data"
     system true
   end
 

@@ -1,7 +1,9 @@
+<% if @ssl %>
 map $http_x_forwarded_proto $https_offloaded {
     default off;
     https on;
 }
+<% end %>
 
 server {
 <% if !@ssl %>
@@ -26,6 +28,7 @@ server {
         location / {
                 try_files $uri $uri/ @handler; ## If missing pass the URI to Magento's front handler
                 index index.php index.html index.html;
+                <% if @ssl %>fastcgi_param  HTTPS on;<% end %>
         }
         ## These locations would be hidden by .htaccess normally
         location ^~ /app/                { deny all; }
@@ -40,17 +43,21 @@ server {
                 access_log off;
                 log_not_found off; 
                 return 404;
+                <% if @ssl %>fastcgi_param  HTTPS on;<% end %>
         }
         location @handler { ## Magento uses a common front handler
                 rewrite / /index.php;
+                <% if @ssl %>fastcgi_param  HTTPS on;<% end %>
         }
         location ~ .php/ { ## Forward paths like /js/index.php/x.js to relevant handler
                 rewrite ^(.*.php)/ $1 last;
+                <% if @ssl %>fastcgi_param  HTTPS on;<% end %>
         }
         location /var/export/ { ## Allow admins only to view export folder
                 auth_basic           "Restricted"; ## Message shown in login window
                 auth_basic_user_file htpasswd; ## See /etc/nginx/htpassword
                 autoindex            on;
+                <% if @ssl %>fastcgi_param  HTTPS on;<% end %>
         }
         location ~\.php$ {
                 expires        off; ## Do not cache dynamic content
@@ -61,23 +68,12 @@ server {
                 #fastcgi_param  MAGE_RUN_CODE default; ## Store code is defined in administration > Configuration > Manage Stores
                 #fastcgi_param  MAGE_RUN_TYPE store;
                 include fastcgi_params;
+                <% if @ssl %>fastcgi_param  HTTPS on;<% end %>
         }
         ## A little caching
         location ~* \.(jpg|jpeg|gif|png|css|js|ico|xml)$ {
                 access_log        off;
                 expires           1h;
+                <% if @ssl %>fastcgi_param  HTTPS on;<% end %>
         }
-}
-# to rewrite www to non-www.
-server {
-        <% if @ssl %>
-        listen <%= @https %>;
-        server_name www.<%= @sitedomain %>;
-        rewrite ^ https://<%= @sitedomain %>$request_uri? permanent;
-        <% else %>
-        <% if node[:magento][:varnish][:use_varnish] %><%= "listen #{node[:magento][:varnish][:backend_http]};" %>
-        <% else %><%= "listen #{@http};" %><% end %>
-        server_name www.<%= @sitedomain %>;
-        rewrite ^ http://<%= @sitedomain %>$request_uri? permanent;
-        <% end %>
 }

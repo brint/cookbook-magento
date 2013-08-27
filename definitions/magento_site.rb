@@ -97,8 +97,10 @@ define :magento_site do
   end
 
   master = "master"
+  local = "127.0.0.1"
   if Chef::Recipe::Magento.ip_is_local?(node, node['php-fpm']['master'])
-    master = "127.0.0.1" # This is for the nginx template
+    master = node['php-fpm']['master'] # This is for the nginx template
+    local = node['php-fpm']['master']
   end
 
   template "#{node[:nginx][:dir]}/conf.d/routing.conf" do
@@ -107,7 +109,8 @@ define :magento_site do
     group "root"
     mode 0644
     variables(
-      :master => node['php-fpm']['master']
+      :master => node['php-fpm']['master'],
+      :local => local
     )
     action :create_if_missing
   end

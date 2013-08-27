@@ -1,6 +1,6 @@
 # The 'readonly' fastcgi_pass backend, used for standard pages. Cannot write to filesystem. Can be used on any web-0x node.
 upstream ro_php_fpm {
-        server 127.0.0.1:9001;
+        server <%= @local %>:9001;
 }
 # The 'canwrite' fastcgi_pass backend, used for admin and upload style pages. Can write to fs on web-01
 upstream rw_php_fpm {

@@ -29,7 +29,7 @@ when "rhel", "fedora"
     end
   end
   # Save iptables rules
-  execute "Saving iptables rule set" do
+  execute "Saving memcached iptables rule set" do
     command "/sbin/service iptables save"
   end
 else

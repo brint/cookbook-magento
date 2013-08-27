@@ -28,7 +28,7 @@ class Chef::Recipe::Magento
   end
 
   # Determine if an IP is local to this machine
-  def self.ip_is_local?(ip)
+  def self.ip_is_local?(node, ip)
     return true if ip == 'localhost' || ip == '127.0.0.1'
     node['network']['interfaces'].each do |iface|
       node['network']['interfaces'][iface[0]]['addresses'].each do |addr|

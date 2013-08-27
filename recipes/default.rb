@@ -151,7 +151,7 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
     # enc_key = search(:magento, "id:enckey").first
   # end
 
-  if Magento.ip_is_local?(node[:mysql][:bind_address])
+  if Magento.ip_is_local?(node, node[:mysql][:bind_address])
     include_recipe "magento::mysql"
   end
 

@@ -1,4 +1,4 @@
-define :fpm_slaves do
+define :fpm_allow do
 
   php_conf =  if platform?('centos', 'redhat')
                 ["/etc", "/etc/php.d"]

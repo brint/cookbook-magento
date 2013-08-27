@@ -47,7 +47,7 @@ define :fpm_allow do
       firewall_rule "fpm-#{fpm_port}" do
         port fpm_port
         source ip
-        interface eth1
+        interface "eth1"
         action :allow
       end
     end

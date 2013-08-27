@@ -4,9 +4,11 @@ map $http_x_forwarded_proto $https_offloaded {
 }
 
 server {
+<% if !@ssl %>
         log_format show_upstream '$remote_addr - $remote_user [$time_local] "$request" '
                 '$status $body_bytes_sent "$http_referer" '
                 '"$http_user_agent" - $upstream_addr $upstream_status $upstream_response_time';
+<% end %>
 <% if @ssl %>
         listen <%= @https %>;
         ssl on;

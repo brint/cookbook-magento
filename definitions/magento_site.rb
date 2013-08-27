@@ -97,7 +97,7 @@ define :magento_site do
   end
 
   master = "master"
-  if Magento.ip_is_local?(node, node['php-fpm']['master'])
+  if Chef::Recipe::Magento.ip_is_local?(node, node['php-fpm']['master'])
     master = "127.0.0.1" # This is for the nginx template
   end
 

@@ -96,13 +96,23 @@ define :magento_site do
     end
   end
 
-  %w{backend}.each do |file|
-    cookbook_file "#{node[:nginx][:dir]}/conf.d/#{file}.conf" do
-      source "nginx/#{file}.conf"
-      mode 0644
-      owner "root"
-      group "root"
-    end
+  master = "master"
+  local = "127.0.0.1"
+  if Chef::Recipe::Magento.ip_is_local?(node, node['php-fpm']['master'])
+    master = node['php-fpm']['master'] # This is for the nginx template
+    local = node['php-fpm']['master']
+  end
+
+  template "#{node[:nginx][:dir]}/conf.d/routing.conf" do
+    source "routing.erb"
+    owner "root"
+    group "root"
+    mode 0644
+    variables(
+      :master => node['php-fpm']['master'],
+      :local => local
+    )
+    action :create_if_missing
   end
 
   bash "Drop default site" do
@@ -124,7 +134,8 @@ define :magento_site do
         :https => node[:magento][:firewall][:https],
         :path => "#{node[:magento][:dir]}",
         :ssl => (site == "ssl")?true:false,
-        :sitedomain => sitedomain
+        :sitedomain => sitedomain,
+        :master => master
       )
     end
     nginx_site "#{site}" do

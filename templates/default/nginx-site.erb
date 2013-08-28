@@ -1,70 +1,79 @@
-map $http_x_forwarded_proto $https_offloaded {
-  default off;
-  https on;
-}
-
-map $http_host $magesite {
-
-<% node[:magento][:run_codes].each do |domain, code| %><%= "#{domain} #{code};\n" %><% end %>
-}
-
-server {
 <% if @ssl %>
-  listen <%= @https %>;
-  ssl on;
-  ssl_certificate ssl/<%= @sitedomain %>.crt;
-  ssl_certificate_key ssl/<%= @sitedomain %>.key;
-  access_log  <%= node[:nginx][:log_dir] %>/<%= @sitedomain %>-ssl.access.log;
-<% else %>
-  <% if node[:magento][:varnish][:use_varnish] %><%= "listen #{node[:magento][:varnish][:backend_http]};" %>
-  <% else %><%= "listen #{@http};" %><% end %>
-  access_log  <%= node[:nginx][:log_dir] %>/<%= @sitedomain %>.access.log;
+map $http_x_forwarded_proto $https_offloaded {
+    default off;
+    https on;
+}
 <% end %>
 
-  server_name  <%= node[:hostname] %>;
-  root <%= @path %>;
-  autoindex off;
-
-  # protection (we have no .htaccess)
-  location ~ (^/(app/|includes/|lib/|/pkginfo/|var/|report/config.xml)|/\.git/|/\.hg/|/\.svn/|\.installed|\.ssh|/.hta.+) {
-    deny all;
-  }
-
-  # handle all .php files, /downloader and /report
-  location ~ (\.php|/downloader/?|/report/?)$ {
-    if ($request_uri ~ /(downloader|report)$){ # no trailing /, redirecting
-      rewrite  ^(.*)$ $1/ permanent;
-    }
-    fastcgi_index index.php;
-    include /etc/nginx/fastcgi_params;
-    fastcgi_param HTTPS $https_offloaded;
-    fastcgi_param MAGE_RUN_TYPE <%= node[:magento][:run_type] %>;
-    fastcgi_param MAGE_RUN_CODE $magesite;
-    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-    <% if @ssl %>fastcgi_param HTTPS on;<% end %>
-    if (-e $request_filename) { # check if requested path exists
-      fastcgi_pass <%= node['php-fpm']['pool']['magento']['listen'] %>;
-    }
-  }
-
-  # handle magento
-  location / {
-    # set expire headers
-    if ($request_uri ~* "\.(ico|css|js|gif|jpe?g|png)$") {
-      expires max;
-    }
-    # set fastcgi settings, not allowed in the "if" block
-    include /etc/nginx/fastcgi_params;
-    fastcgi_param HTTPS $https_offloaded;
-    fastcgi_param MAGE_RUN_TYPE <%= node[:magento][:run_type] %>;
-    fastcgi_param MAGE_RUN_CODE $magesite;
-    fastcgi_param SCRIPT_FILENAME $document_root/index.php;
-    fastcgi_param SCRIPT_NAME /index.php;
-    <% if @ssl %>fastcgi_param HTTPS on;<% end %>
-    # rewrite - if file not found, pass it to the backend
-    if (!-f $request_filename) {
-      fastcgi_pass <%= node['php-fpm']['pool']['magento']['listen'] %>;
-      break;
-    }
-  }
+server {
+<% if !@ssl %>
+        log_format show_upstream '$remote_addr - $remote_user [$time_local] "$request" '
+                '$status $body_bytes_sent "$http_referer" '
+                '"$http_user_agent" - $upstream_addr $upstream_status $upstream_response_time';
+<% end %>
+<% if @ssl %>
+        listen <%= @https %>;
+        ssl on;
+        ssl_certificate ssl/<%= @sitedomain %>.crt;
+        ssl_certificate_key ssl/<%= @sitedomain %>.key;
+        access_log <%= node[:nginx][:log_dir] %>/<%= @sitedomain %>-ssl.access.log show_upstream;
+<% else %>
+        <% if node[:magento][:varnish][:use_varnish] %><%= "listen #{node[:magento][:varnish][:backend_http]};" %>
+        <% else %><%= "listen #{@http};" %><% end %>
+        access_log <%= node[:nginx][:log_dir] %>/<%= @sitedomain %>.access.log show_upstream;
+<% end %>
+        error_log <%= node[:nginx][:log_dir] %>/<%= @sitedomain %>.error.log error;
+        server_name <%= @sitedomain %> <%= @master %>;
+        root <%= @path %>;
+        location / {
+                try_files $uri $uri/ @handler; ## If missing pass the URI to Magento's front handler
+                index index.php index.html index.html;
+                <% if @ssl %>fastcgi_param  HTTPS on;<% end %>
+        }
+        ## These locations would be hidden by .htaccess normally
+        location ^~ /app/                { deny all; }
+        location ^~ /includes/           { deny all; }
+        location ^~ /lib/                { deny all; }
+        location ^~ /media/downloadable/ { deny all; }
+        location ^~ /pkginfo/            { deny all; }
+        location ^~ /report/config.xml   { deny all; }
+        location ^~ /var/                { deny all; }
+        ## Disable .htaccess and other hidden files
+        location ~ /\. {
+                access_log off;
+                log_not_found off; 
+                return 404;
+                <% if @ssl %>fastcgi_param  HTTPS on;<% end %>
+        }
+        location @handler { ## Magento uses a common front handler
+                rewrite / /index.php;
+                <% if @ssl %>fastcgi_param  HTTPS on;<% end %>
+        }
+        location ~ .php/ { ## Forward paths like /js/index.php/x.js to relevant handler
+                rewrite ^(.*.php)/ $1 last;
+                <% if @ssl %>fastcgi_param  HTTPS on;<% end %>
+        }
+        location /var/export/ { ## Allow admins only to view export folder
+                auth_basic           "Restricted"; ## Message shown in login window
+                auth_basic_user_file htpasswd; ## See /etc/nginx/htpassword
+                autoindex            on;
+                <% if @ssl %>fastcgi_param  HTTPS on;<% end %>
+        }
+        location ~\.php$ {
+                expires        off; ## Do not cache dynamic content
+                fastcgi_pass  $fcgi_pass;
+                fastcgi_index  index.php;
+                fastcgi_param  SCRIPT_FILENAME  <%= @path %>$fastcgi_script_name;
+                ## These two lines are only needed for magento vhosts - so commented out for now
+                #fastcgi_param  MAGE_RUN_CODE default; ## Store code is defined in administration > Configuration > Manage Stores
+                #fastcgi_param  MAGE_RUN_TYPE store;
+                include fastcgi_params;
+                <% if @ssl %>fastcgi_param  HTTPS on;<% end %>
+        }
+        ## A little caching
+        location ~* \.(jpg|jpeg|gif|png|css|js|ico|xml)$ {
+                access_log        off;
+                expires           1h;
+                <% if @ssl %>fastcgi_param  HTTPS on;<% end %>
+        }
 }

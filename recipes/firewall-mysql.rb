@@ -26,7 +26,7 @@ when "rhel", "fedora"
     end
   end
   # Save iptables rules
-  execute "Saving iptables rule set" do
+  execute "Saving mysql iptables rule set" do
     command "/sbin/service iptables save"
   end
 else

@@ -49,11 +49,32 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
               end
 
   user "#{user}" do
-    comment "magento guy"
+    comment "magento system user"
     home "#{node[:magento][:dir]}"
     system true
   end
+
+  ro_user = "#{user}-ro"
+
+  user "#{ro_user}" do
+    comment "magento read only user"
+    home "#{node[:magento][:dir]}"
+    gid "www-data"
+    system true
+  end
+
+  node.set['php-fpm']['pool']['magento']['user'] = ro_user
+  node.set['php-fpm']['pool']['magento']['group'] = ro_user
+
   # EOF: Initialization block
+
+  # Setup hosts file entry pointing to master
+  execute "Add '#{node['php-fpm']['master']} master' to /etc/hosts" do
+    command <<-EOH
+    echo "#{node['php-fpm']['master']} master" >> /etc/hosts
+    EOH
+    not_if "grep '#{node['php-fpm']['master']} master' /etc/hosts"
+  end
 
   # Install php-fpm package
   include_recipe "php-fpm"

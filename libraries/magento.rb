@@ -27,12 +27,12 @@ class Chef::Recipe::Magento
     return SecureRandom.uuid.gsub('-', '')
   end
 
-  # Determine if this node is the MySQL server based on IP
-  def self.db_is_local?(node)
-    return true if node['mysql']['bind_address'] == 'localhost' || node['mysql']['bind_address'] == '127.0.0.1'
+  # Determine if an IP is local to this machine
+  def self.ip_is_local?(node, ip)
+    return true if ip == 'localhost' || ip == '127.0.0.1'
     node['network']['interfaces'].each do |iface|
       node['network']['interfaces'][iface[0]]['addresses'].each do |addr|
-        return true if addr[0] == node['mysql']['bind_address']
+        return true if addr[0] == ip
       end
     end
     return false

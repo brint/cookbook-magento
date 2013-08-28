@@ -50,10 +50,12 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
               end
 
   user "#{user}" do
-    comment "magento guy"
+    comment "magento system user"
     home "#{node[:magento][:dir]}"
     system true
   end
+
+  node.set['php-fpm']['pool']['magento']['listen'] = "#{node['php-fpm']['master']}:9001"
   # EOF: Initialization block
 
   # Install php-fpm package
@@ -149,7 +151,7 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
     # enc_key = search(:magento, "id:enckey").first
   # end
 
-  if Magento.db_is_local?(node)
+  if Magento.ip_is_local?(node, node[:mysql][:bind_address])
     include_recipe "magento::mysql"
   end
 
@@ -165,8 +167,27 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
     EOH
   end
 
+
+  # Perform all initial configuration.  This section is for one-time configuration only.
   if !File.exist?("#{node[:magento][:dir]}/app/etc/local.xml") && !Magento.tables_exist?(mysql[:bind_address], db[:username], db[:password], db[:database])
     magento_initial_configuration
+
+    # Configuration for PageCache module to be enabled
+    execute "pagecache-database-inserts" do
+      command "/usr/bin/mysql #{node[:magento][:db][:database]} -u #{node[:magento][:db][:username]} -h #{node[:mysql][:bind_address]} -P #{node[:mysql][:port]} -p#{node[:magento][:db][:password]} < /root/pagecache_inserts.sql"
+      action :nothing
+    end
+
+    # Initializes the page cache configuration
+    template "/root/pagecache_inserts.sql" do
+      source "pagecache.sql.erb"
+      mode "0644"
+      owner "root"
+      variables(
+        :varnishservers => "localhost"
+      )
+      notifies :run, resources(:execute => "pagecache-database-inserts"), :immediately
+    end
   end
 
   # Install and configure varnish
@@ -190,5 +211,7 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
     echo '#{inst_date}' > #{node[:magento][:dir]}/.installed
     EOH
   end
-
 end
+
+# Allow all slave nodes to leverage this instance of PHP FPM
+fpm_allow

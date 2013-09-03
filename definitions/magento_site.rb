@@ -103,7 +103,7 @@ define :magento_site do
   if Chef::Recipe::Magento.ip_is_local?(node, node['php-fpm']['master'])
     master = node['php-fpm']['master'] # This is for the nginx template
     local = node['php-fpm']['master']
-    additional = "master master.#{sitedomain} node['php-fpm']['master']"
+    additional = "master master.#{sitedomain} #{node['php-fpm']['master']}"
   end
 
   template "#{node[:nginx][:dir]}/conf.d/routing.conf" do

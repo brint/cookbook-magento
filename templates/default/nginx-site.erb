@@ -23,7 +23,7 @@ server {
         access_log <%= node[:nginx][:log_dir] %>/<%= @sitedomain %>.access.log show_upstream;
 <% end %>
         error_log <%= node[:nginx][:log_dir] %>/<%= @sitedomain %>.error.log error;
-        server_name <%= @sitedomain %> <%= @master %>;
+        server_name <%= @sitedomain %> <%= @additional %>;
         root <%= @path %>;
         location / {
                 try_files $uri $uri/ @handler; ## If missing pass the URI to Magento's front handler

@@ -165,6 +165,7 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
     chown -R #{user}:#{group} #{node[:magento][:dir]}
     chmod -R o+w media
     chmod -R o+w var
+    chown -R #{ro_user} var
     EOH
   end
 

@@ -55,6 +55,14 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
     system true
   end
 
+  # For using things like lsync to read-only nodes
+  ro_user = "#{user}-ro"
+  user "#{ro_user}" do
+    comment "magento read only user"
+    home "#{node[:magento][:dir]}"
+    system true
+  end
+
   node.set['php-fpm']['pool']['magento']['listen'] = "#{node['php-fpm']['master']}:9001"
   # EOF: Initialization block
 
@@ -195,6 +203,13 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
 
   # Index everything
   Magento.reindex_all("#{node[:magento][:dir]}/shell/indexer.php")
+
+  bash "Set permissions for local.xml" do
+    cwd node[:magento][:dir]
+    code <<-EOH
+    chown #{user}:#{user}-ro app/etc/local.xml
+    EOH
+  end
 
   bash "Final verification of permissions & ownership" do
     cwd node[:magento][:dir]

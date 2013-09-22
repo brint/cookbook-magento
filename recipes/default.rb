@@ -177,7 +177,7 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
 
 
   # Perform all initial configuration.  This section is for one-time configuration only.
-  if !File.exist?("#{node[:magento][:dir]}/app/etc/local.xml") && !Magento.tables_exist?(mysql[:bind_address], db[:username], db[:password], db[:database])
+  if !File.exist?("#{node[:magento][:dir]}/app/etc/local.xml")
     magento_initial_configuration
 
     # Configuration for PageCache module to be enabled
@@ -219,7 +219,6 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
     chown #{user}:#{user}-ro app/etc/local.xml
     chmod 640 app/etc/local.xml
     EOH
-    only_if { ::File.exists?(File.join(node[:magento][:dir], "app/etc/local.xml")) }
   end
 
   bash "Touch .installed flag" do

@@ -34,7 +34,7 @@ node.set_unless[:magento][:session][:save_path] = "tcp://#{node[:magento][:memca
 
 template "#{node[:magento][:dir]}/app/etc/local.xml" do
   source "local.xml.erb"
-  mode "0600"
+  mode "0640"
   owner "#{node[:magento][:system_user]}"
   variables(
     :db_host => node[:mysql][:bind_address],

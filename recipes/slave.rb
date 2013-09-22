@@ -59,7 +59,6 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
   user "#{ro_user}" do
     comment "magento read only user"
     home "#{node[:magento][:dir]}"
-    gid ro_user
     system true
   end
 
@@ -156,7 +155,7 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
     end
     execute "untar-magento" do
       cwd node[:magento][:dir]
-      command "tar --strip-components 1 -xzf #{Chef::Config[:file_cache_path]}/magento.tar.gz"
+      command "tar --strip-components 1 --no-same-owner -kxzf #{Chef::Config[:file_cache_path]}/magento.tar.gz"
     end
   end
 
@@ -166,6 +165,7 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
     chown -R #{user}:#{group} #{node[:magento][:dir]}
     chmod -R o+w media
     chmod -R o+w var
+    chown -R #{ro_user} var
     EOH
   end
 

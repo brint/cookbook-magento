@@ -55,6 +55,14 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
     system true
   end
 
+  # For using things like lsync to read-only nodes
+  ro_user = "#{user}-ro"
+  user "#{ro_user}" do
+    comment "magento read only user"
+    home "#{node[:magento][:dir]}"
+    system true
+  end
+
   node.set['php-fpm']['pool']['magento']['listen'] = "#{node['php-fpm']['master']}:9001"
   # EOF: Initialization block
 
@@ -138,7 +146,7 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
     end
     execute "untar-magento" do
       cwd node[:magento][:dir]
-      command "tar --strip-components 1 -xzf #{Chef::Config[:file_cache_path]}/magento.tar.gz"
+      command "tar --strip-components 1 --no-same-owner -kxzf #{Chef::Config[:file_cache_path]}/magento.tar.gz"
     end
   end
 
@@ -202,6 +210,14 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
     chown -R #{user}:#{group} #{node[:magento][:dir]}
     chmod -R o+w media
     chmod -R o+w var
+    EOH
+  end
+
+  bash "Set permissions for local.xml" do
+    cwd node[:magento][:dir]
+    code <<-EOH
+    chown #{user}:#{user}-ro app/etc/local.xml
+    chmod 640 app/etc/local.xml
     EOH
   end
 

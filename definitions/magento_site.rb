@@ -98,12 +98,14 @@ define :magento_site do
 
   master = "master"
   local = "127.0.0.1"
-  additional = ""
+  additional = "" 
 
   if Chef::Recipe::Magento.ip_is_local?(node, node['php-fpm']['master'])
     master = node['php-fpm']['master'] # This is for the nginx template
     local = node['php-fpm']['master']
     additional = "master master.#{sitedomain} #{node['php-fpm']['master']}"
+  else
+    additional = "#{node['hostname']} #{node['hostname']}.#{sitedomain} #{node[:network][:interfaces][:eth1][:addresses].detect{|k,v| v[:family] == "inet" }.first}"
   end
 
   template "#{node[:nginx][:dir]}/conf.d/routing.conf" do

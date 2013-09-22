@@ -217,6 +217,7 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
     cwd node[:magento][:dir]
     code <<-EOH
     chown #{user}:#{user}-ro app/etc/local.xml
+    chmod 640 app/etc/local.xml
     EOH
   end
 

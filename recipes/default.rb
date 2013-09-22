@@ -219,6 +219,7 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
     chown #{user}:#{user}-ro app/etc/local.xml
     chmod 640 app/etc/local.xml
     EOH
+    only_if { ::File.exists?(File.join(node[:magento][:dir], "app/etc/local.xml")) }
   end
 
   bash "Touch .installed flag" do

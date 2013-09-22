@@ -169,6 +169,14 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
     EOH
   end
 
+  bash "Set permissions for local.xml" do
+    cwd node[:magento][:dir]
+    code <<-EOH
+    chown #{user}:#{user}-ro app/etc/local.xml
+    chmod 640 app/etc/local.xml
+    EOH
+  end
+
   # Install and configure varnish
   include_recipe "magento::varnish" if node[:magento][:varnish][:use_varnish]
 

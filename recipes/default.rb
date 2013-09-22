@@ -204,19 +204,19 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
   # Index everything
   Magento.reindex_all("#{node[:magento][:dir]}/shell/indexer.php")
 
-  bash "Set permissions for local.xml" do
-    cwd node[:magento][:dir]
-    code <<-EOH
-    chown #{user}:#{user}-ro app/etc/local.xml
-    EOH
-  end
-
   bash "Final verification of permissions & ownership" do
     cwd node[:magento][:dir]
     code <<-EOH
     chown -R #{user}:#{group} #{node[:magento][:dir]}
     chmod -R o+w media
     chmod -R o+w var
+    EOH
+  end
+
+  bash "Set permissions for local.xml" do
+    cwd node[:magento][:dir]
+    code <<-EOH
+    chown #{user}:#{user}-ro app/etc/local.xml
     EOH
   end
 

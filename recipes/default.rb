@@ -177,7 +177,7 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
 
 
   # Perform all initial configuration.  This section is for one-time configuration only.
-  if !File.exist?("#{node[:magento][:dir]}/app/etc/local.xml")
+  if !File.exist?(File.join(node[:magento][:dir], "app/etc/local.xml"))
     magento_initial_configuration
 
     # Configuration for PageCache module to be enabled

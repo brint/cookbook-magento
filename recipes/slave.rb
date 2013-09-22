@@ -155,7 +155,7 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
     end
     execute "untar-magento" do
       cwd node[:magento][:dir]
-      command "tar --strip-components 1 -kxzf #{Chef::Config[:file_cache_path]}/magento.tar.gz"
+      command "tar --strip-components 1 --no-same-owner -kxzf #{Chef::Config[:file_cache_path]}/magento.tar.gz"
     end
   end
 

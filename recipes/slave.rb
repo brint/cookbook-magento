@@ -139,7 +139,7 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
   directory "#{node[:magento][:dir]}" do
     owner user
     group group
-    mode "0755"
+    mode "0711"
     action :create
     recursive true
   end
@@ -173,7 +173,7 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
     cwd node[:magento][:dir]
     code <<-EOH
     chown #{user}:#{user}-ro app/etc/local.xml
-    chmod 640 app/etc/local.xml
+    chmod 644 app/etc/local.xml
     EOH
     only_if { ::File.exists?(File.join(node[:magento][:dir], "app/etc/local.xml")) }
   end

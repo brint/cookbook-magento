@@ -5,7 +5,7 @@ Vagrant.configure("2") do |config|
   # All Vagrant configuration is done here. The most common configuration
   # options are documented and commented below. For a complete reference,
   # please see the online documentation at vagrantup.com.
-
+  config.omnibus.chef_version = "11.4.0"
   config.vm.hostname = "cookbook-magento-berkshelf"
 
   case ENV['VMBOX']

@@ -6,17 +6,19 @@ map $http_x_forwarded_proto $https_offloaded {
 <% end %>
 
 server {
-<% if !@ssl %>
+<% if @ssl %>
+        log_format ssl_show_upstream '$remote_addr - $remote_user [$time_local] "$request" '
+<% else %>
         log_format show_upstream '$remote_addr - $remote_user [$time_local] "$request" '
+<% end %>
                 '$status $body_bytes_sent "$http_referer" '
                 '"$http_user_agent" - $upstream_addr $upstream_status $upstream_response_time';
-<% end %>
 <% if @ssl %>
         listen <%= @https %>;
         ssl on;
         ssl_certificate ssl/<%= @sitedomain %>.crt;
         ssl_certificate_key ssl/<%= @sitedomain %>.key;
-        access_log <%= node[:nginx][:log_dir] %>/<%= @sitedomain %>-ssl.access.log show_upstream;
+        access_log <%= node[:nginx][:log_dir] %>/<%= @sitedomain %>-ssl.access.log ssl_show_upstream;
 <% else %>
         <% if node[:magento][:varnish][:use_varnish] %><%= "listen #{node[:magento][:varnish][:backend_http]};" %>
         <% else %><%= "listen #{@http};" %><% end %>

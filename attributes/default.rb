@@ -53,6 +53,7 @@ set_unless['php-fpm']['pool']['magento']['max_spare_servers'] = 35
 set_unless['php-fpm']['pool']['magento']['max_requests'] = 500
 
 default['php-fpm']['master'] = '127.0.0.1'
+default['php-fpm']['slaves'] = []
 
 # Database Credentials & Connection Settings
 ::Chef::Node.send(:include, Opscode::OpenSSL::Password)

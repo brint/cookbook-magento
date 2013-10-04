@@ -1,5 +1,5 @@
 # General settings
-default[:magento][:download_url] = "http://www.magentocommerce.com/downloads/assets/1.7.0.2/magento-1.7.0.2.tar.gz"
+default[:magento][:download_url] = "http://www.magentocommerce.com/downloads/assets/1.8.0.0/magento-1.8.0.0.tar.gz"
 default[:magento][:dir] = "/var/www/magento"
 default[:magento][:use_sample_data] = false
 default[:magento][:sample_data_url] = 'http://www.magentocommerce.com/downloads/assets/1.6.1.0/magento-sample-data-1.6.1.0.tar.gz'
@@ -23,7 +23,7 @@ default[:magento][:url] = "http://example.com/"
 default[:magento][:use_rewrites] = "yes"
 default[:magento][:use_secure] = "yes"
 default[:magento][:secure_base_url] = "https://example.com/"
-default[:magento][:use_secure_admin] = "yes"
+default[:magento][:use_secure_admin] = "no"
 default[:magento][:enable_charts] = "yes"
 
 # Required packages

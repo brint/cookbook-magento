@@ -119,7 +119,7 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
   directory "#{node[:magento][:dir]}" do
     owner user
     group group
-    mode "0755"
+    mode "0711"
     action :create
     recursive true
   end
@@ -159,8 +159,6 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
     cwd node[:magento][:dir]
     code <<-EOH
     chown -R #{user}:#{group} #{node[:magento][:dir]}
-    chmod -R o+w media
-    chmod -R o+w var
     EOH
   end
 

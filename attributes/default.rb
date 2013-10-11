@@ -23,7 +23,7 @@ default[:magento][:url] = "http://example.com/"
 default[:magento][:use_rewrites] = "yes"
 default[:magento][:use_secure] = "yes"
 default[:magento][:secure_base_url] = "https://example.com/"
-default[:magento][:use_secure_admin] = "no"
+default[:magento][:use_secure_admin] = "yes"
 default[:magento][:enable_charts] = "yes"
 
 # Required packages

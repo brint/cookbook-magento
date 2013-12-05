@@ -59,6 +59,7 @@ when "rhel", "fedora"
     variables(
       :instance => "sessions",
       :port => node[:magento][:memcached][:sessions][:port],
+      :udp_port => node[:magento][:memcached][:sessions][:port],
       :user => node[:memcached][:user],
       :maxconn => node[:magento][:memcached][:sessions][:maxconn],
       :memory => node[:magento][:memcached][:sessions][:memory],
@@ -73,6 +74,7 @@ when "rhel", "fedora"
     variables(
       :instance => "backend",
       :port => node[:magento][:memcached][:slow_backend][:port],
+      :udp_port => node[:magento][:memcached][:slow_backend][:port],
       :user => node[:memcached][:user],
       :maxconn => node[:magento][:memcached][:slow_backend][:maxconn],
       :memory => node[:magento][:memcached][:slow_backend][:memory],

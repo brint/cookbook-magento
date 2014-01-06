@@ -5,9 +5,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,10 +27,10 @@ node.set[:memcached][:maxconn] = node[:magento][:memcached][:sessions][:maxconn]
 
 case node[:platform_family]
 when "rhel", "fedora"
-  
+
   package "memcached"
   package "libmemcached-devel"
-  
+
   service "memcached" do
     action :disable
     notifies :stop, "service[memcached]", :immediately
@@ -52,6 +52,7 @@ when "rhel", "fedora"
     variables(
       :instance => "sessions",
       :port => node[:magento][:memcached][:sessions][:port],
+      :udp_port => node[:magento][:memcached][:slow_backend][:port],
       :user => node[:memcached][:user],
       :maxconn => node[:magento][:memcached][:sessions][:maxconn],
       :memory => node[:magento][:memcached][:sessions][:memory],
@@ -66,13 +67,14 @@ when "rhel", "fedora"
     variables(
       :instance => "backend",
       :port => node[:magento][:memcached][:slow_backend][:port],
+      :udp_port => node[:magento][:memcached][:slow_backend][:port],
       :user => node[:memcached][:user],
       :maxconn => node[:magento][:memcached][:slow_backend][:maxconn],
       :memory => node[:magento][:memcached][:slow_backend][:memory],
       :listen => node[:magento][:memcached][:slow_backend][:listen]
     )
   end
-else 
+else
   include_recipe "memcached"
   node.set[:memcache][:config_dir] = "/etc"
 
@@ -96,6 +98,7 @@ template "#{node[:memcache][:config_dir]}/memcached_sessions.conf" do
   variables(
     :memory => node[:memcached][:memory],
     :port => node[:memcached][:port],
+    :udp_port => node[:magento][:memcached][:slow_backend][:port],
     :user => node[:memcached][:user],
     :listen => node[:memcached][:listen],
     :maxconn => node[:memcached][:maxconn],
@@ -123,6 +126,7 @@ template "#{node[:memcache][:config_dir]}/memcached_backend.conf" do
   variables(
     :memory => node[:magento][:memcached][:slow_backend][:memory],
     :port => node[:magento][:memcached][:slow_backend][:port],
+    :udp_port => node[:magento][:memcached][:slow_backend][:port],
     :user => node[:memcached][:user],
     :group => node[:memcached][:group],
     :listen => node[:magento][:memcached][:slow_backend][:listen],

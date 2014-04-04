@@ -26,7 +26,7 @@ unless File.exists?(installed_file)
     include_recipe "apt"
   end
 
-  include_recipe "mysql::ruby"
+  include_recipe "mysql-chef_gem"
 
   my_cnf =  if platform?('centos', 'redhat')
                 "/etc"

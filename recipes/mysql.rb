@@ -5,9 +5,9 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -26,7 +26,7 @@ unless File.exists?(installed_file)
     include_recipe "apt"
   end
 
-  include_recipe "mysql::ruby"
+  include_recipe "mysql-chef_gem"
 
   my_cnf =  if platform?('centos', 'redhat')
                 "/etc"
@@ -56,7 +56,7 @@ unless File.exists?(installed_file)
         cd #{name}
         tar --strip-components 1 -xzf #{Chef::Config[:file_cache_path]}/magento-sample-data.tar.gz
         mv media/* #{node[:magento][:dir]}/media/
-  
+
        mv magento_sample_data*.sql data.sql 2>/dev/null
         /usr/bin/mysql -h #{node[:mysql][:bind_address]} -P #{node[:mysql][:port]} -u #{node[:magento][:db][:username]} -p#{node[:magento][:db][:password]} #{node[:magento][:db][:database]} < data.sql
         cd ..

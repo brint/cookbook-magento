@@ -72,7 +72,7 @@ default[:magento][:db][:active] = '1'
 
 # Database settings
 default[:mysql][:bind_address] = "localhost"
-default[:mysql][:port] = 3306
+default[:mysql][:port] = '3306'
 default[:mysql][:interface] = "eth1"
 default[:mysql][:tunable][:max_allowed_packet]   = "32M"
 
@@ -86,7 +86,7 @@ default[:magento][:admin_user][:password] = 'magPass.123' # Required
 # Memcached Server Session Settings
 default[:magento][:memcached][:sessions][:memory] = 512
 default[:magento][:memcached][:sessions][:port] = 11211
-default[:magento][:memcached][:sessions][:maxconn] = 2048 
+default[:magento][:memcached][:sessions][:maxconn] = 2048
 default[:magento][:memcached][:sessions][:listen] = "127.0.0.1"
 default[:magento][:memcached][:sessions][:interface] = "eth1"
 default[:magento][:memcached][:clients] = []

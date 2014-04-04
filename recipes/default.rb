@@ -10,7 +10,7 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
   else
     include_recipe "apt"
   end
-  include_recipe "mysql::ruby"
+  include_recipe "mysql-chef_gem"
 
   if node.has_key?("ec2")
     server_fqdn = node.ec2.public_hostname
@@ -37,7 +37,7 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
     end
   end
 
-  enc_key = node[:magento][:encryption_key] 
+  enc_key = node[:magento][:encryption_key]
 
   machine = node['kernel']['machine'] =~ /x86_64/ ? 'x86_64' : 'i686'
   webserver = node[:magento][:webserver]

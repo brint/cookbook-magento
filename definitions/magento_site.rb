@@ -28,7 +28,7 @@ define :magento_site do
       mode "0600"
       action :create_if_missing
     end
-    if defined?(node[:magento][:ssl][:ca]) 
+    if defined?(node[:magento][:ssl][:ca])
       file "#{node[:nginx][:dir]}/ssl/#{sitedomain}.ca" do
         content node[:magento][:ssl][:ca]
         owner "root"
@@ -48,7 +48,7 @@ define :magento_site do
       action :create_if_missing
     end
 
-    if !File.exists?("#{node[:nginx][:dir]}/ssl/#{sitedomain}.crt") || File.zero?("#{node[:nginx][:dir]}/ssl/#{sitedomain}.crt") 
+    if !File.exists?("#{node[:nginx][:dir]}/ssl/#{sitedomain}.crt") || File.zero?("#{node[:nginx][:dir]}/ssl/#{sitedomain}.crt")
       bash "Combine Certificate and Intermediate Certificates" do
         cwd "#{node[:nginx][:dir]}/ssl"
         code "cat #{sitedomain}.certificate #{sitedomain}.ca > #{sitedomain}.crt"
@@ -85,7 +85,7 @@ define :magento_site do
       group "root"
       action :create_if_missing
     end
-    
+
     cookbook_file "#{node[:nginx][:dir]}/ssl/#{sitedomain}.key" do
       source "blank"
       mode 0600
@@ -98,7 +98,7 @@ define :magento_site do
 
   master = "master"
   local = "127.0.0.1"
-  additional = "" 
+  additional = ""
 
   if Chef::Recipe::Magento.ip_is_local?(node, node['php-fpm']['master'])
     master = node['php-fpm']['master'] # This is for the nginx template
@@ -144,6 +144,7 @@ define :magento_site do
       )
     end
     nginx_site "#{site}" do
+      template nil
       notifies :reload, resources(:service => "nginx")
     end
   end

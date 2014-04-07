@@ -10,6 +10,7 @@ unless File.exist?("#{node[:magento][:dir]}/.installed")
   else
     include_recipe "apt"
   end
+  include_recipe "mysql::client"
   include_recipe "mysql-chef_gem"
 
   if node.has_key?("ec2")

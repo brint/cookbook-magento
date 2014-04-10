@@ -27,6 +27,11 @@ server {
         error_log <%= node[:nginx][:log_dir] %>/<%= @sitedomain %>.error.log error;
         server_name <%= @sitedomain %> <%= @additional %>;
         root <%= @path %>;
+
+        # Increase timeouts for when we need to reindex in the gui
+        send_timeout 600;
+        proxy_read_timeout 600;
+
         location / {
                 try_files $uri $uri/ @handler; ## If missing pass the URI to Magento's front handler
                 index index.php index.html index.html;
@@ -43,7 +48,7 @@ server {
         ## Disable .htaccess and other hidden files
         location ~ /\. {
                 access_log off;
-                log_not_found off; 
+                log_not_found off;
                 return 404;
                 <% if @ssl %>fastcgi_param  HTTPS on;<% end %>
         }

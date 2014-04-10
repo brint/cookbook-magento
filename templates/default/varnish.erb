@@ -17,8 +17,6 @@ MEMLOCK=82000
 # the -n switch, to have more instances on a single server.
 INSTANCE=<%= node[:hostname] %>
 
-
-
 # Pass the Daemon options
 
 DAEMON_OPTS="-a :<%= node[:magento][:firewall][:http] %> \
@@ -30,4 +28,3 @@ DAEMON_OPTS="-a :<%= node[:magento][:firewall][:http] %> \
               -s malloc,<%= node[:magento][:varnish][:memory] %> \
               -S /etc/varnish/secret \
               -n $INSTANCE"
-

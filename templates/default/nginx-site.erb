@@ -20,6 +20,10 @@ server {
   root <%= @path %>;
   autoindex off;
 
+  # Increase timeouts for when we need to reindex in the gui
+  send_timeout 600;
+  proxy_read_timeout 600;
+
   # protection (we have no .htaccess)
   location ~ (^/(app/|includes/|lib/|/pkginfo/|var/|report/config.xml)|/\.git/|/\.hg/|/\.svn/|\.installed|\.ssh|/.hta.+) {
     deny all;
